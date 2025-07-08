@@ -1,9 +1,10 @@
 ﻿namespace Assets.Scripts
 {
-    public enum GuyColour
+    public enum TileColour
     {
         Blue,
         Green,
-        Pink,
+        Red,
+        White,
     }
 }
