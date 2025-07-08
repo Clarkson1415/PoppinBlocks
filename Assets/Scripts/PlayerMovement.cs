@@ -26,8 +26,6 @@ namespace Assets.Scripts
 
         private void Start()
         {
-            GameLevels.Initialise();
-
             rb = GetComponent<Rigidbody2D>();
             moveOnGrid = GetComponent<MoveOnGrid>();
             unit = GetComponent<Unit>();
@@ -44,6 +42,11 @@ namespace Assets.Scripts
             if (!context.started)
                 return;
 
+            if (Popped.hasPopped.Contains(this.unit))
+            {
+                return;
+            }
+
             moveInput = context.ReadValue<Vector2>();
 
             if (Mathf.Abs(moveInput.x) > Mathf.Abs(moveInput.y))
@@ -58,14 +61,14 @@ namespace Assets.Scripts
             this.moveOnGrid.MoveBy(moveInput);
 
             // check if touching another of the same colour.
-            if (!this.unit.IsTouchingAnotherOfSameColour)
+            if (!this.unit.IsTouchingAnotherOfSameColour)// see if npc2 here is at position 1, 2 like it should be
             {
                 return;
             }
-            
+
             // this.unit.pop
             this.unit.Pop();
-
+            
             // Won if all the objects have been popped.
             var all = FindObjectsByType<Unit>(FindObjectsSortMode.None);
             if (all.All(x => Popped.hasPopped.Contains(x)))
@@ -86,14 +89,11 @@ namespace Assets.Scripts
                 this.NextPlayer.GetComponent<PlayerMovement>().enabled = true;
                 this.NextPlayer.GetComponent<PlayerInput>().enabled = false;
 
-
                 Debug.Log("deactivate this and all current Popped objects here");
-
                 return;
             }
             else
             {
-                // you fucked up
                 Debug.Log("you Messed up Enter to restart");
                 // will have restart at anytime button like 'l'
             }

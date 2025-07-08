@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1058919854690688256}
   - component: {fileID: 2072654169310800669}
   - component: {fileID: 5648548654839198594}
+  - component: {fileID: 3623345180342251219}
   m_Layer: 0
   m_Name: PushBlock
   m_TagString: Pushable
@@ -162,3 +163,15 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &3623345180342251219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3041060746944943082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44817f83b4de6864493afd3e51e7b15f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

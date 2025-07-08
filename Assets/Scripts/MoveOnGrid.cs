@@ -1,15 +1,13 @@
 using Assets.Scripts;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+#nullable enable
 
-[RequireComponent(typeof(GameColour))]
 public class MoveOnGrid : MonoBehaviour
 {
-    private GameColour gameColour;
-
     private void Start()
     {
-        gameColour = GetComponent<GameColour>();
         this.SnapToGrid();
     }
 
@@ -18,8 +16,12 @@ public class MoveOnGrid : MonoBehaviour
         this.transform.position = new Vector3(Mathf.Round(this.transform.position.x), Mathf.Round(transform.position.y), Mathf.Round(this.transform.position.z));
     }
 
-    // togo in unit class
-    // TODO detect when player next to guy. if all touching then pop. if player pushing then push.
+    private void SnapToGrid(Transform transToSnap)
+    {
+        transToSnap.position = new Vector3(Mathf.Round(transToSnap.position.x), Mathf.Round(transToSnap.position.y), Mathf.Round(transToSnap.position.z));
+    }
+
+    private float rayCastDist => this.GetComponent<Unit>().raycastDistance;
 
     /// <summary>
     /// Move unit by offset.
@@ -28,32 +30,64 @@ public class MoveOnGrid : MonoBehaviour
     {
         // check if collider that is a not trigger is in movement direction
         // Cast the ray and ignore your own collider
-        RaycastHit2D[] hits = Physics2D.RaycastAll(this.transform.position, moveBy, 1f);
+        RaycastHit2D itemInFront = Physics2D.Raycast(this.transform.position, moveBy, rayCastDist);
 
-        // If hit this gameobject dont count it. If all colliders in the way are triggers only. we can move in them. Return if they are all NOT Triggers.
-        var externalHits = hits.Where(x => x.collider.gameObject != this.gameObject);
-        var solidHits = externalHits.Where(x => !x.collider.isTrigger);
-
-        if (!solidHits.Any())
+        // if item in front is a blockage return
+        if (itemInFront.collider != null && !itemInFront.collider.isTrigger && itemInFront.collider.gameObject.tag != "Pushable")
         {
-            this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
+            return;
+        }
+
+        // If there is no item in front move and return.
+        if (itemInFront.collider == null || itemInFront.collider.isTrigger)
+        {
+            this.rb.Translate(new Vector3(moveBy.x, moveBy.y, 0));
             this.SnapToGrid();
             return;
         }
 
-        // TODO if solid hits has a unit in it of a different colour we need to push it and whatever is also in that direction.
-        // as long as there are no blockages in that direction i.e. no walls. Other units can be pushed.
-        // if block in direction want to move is a different colour. - i don't think have to check for that? because would already be popped?
-        Debug.Log("do this stuff");
-
-        // If the thing to move is an obstacle. then push it. and whatever is in front of it as long as no blockages.
-        // Units and obstacles will be tagged Pushable.
-        RaycastHit2D itemToPush = Physics2D.Raycast(this.transform.position, moveBy, 1f);
-        
         // check if every object in a chain of that direction is pushable recursively? if so move all the objects by 1 unit by moveBy
-        if (itemToPush.collider.gameObject.tag == "Pushable")
-        {
+        // Get all adjacent pushable items in the direction.
+        // If there is a collider thats not "Pushable" or an IsTrigger dont push.
+        var adjacentPushablesInDirection = new List<Collider2D>();
+        adjacentPushablesInDirection.Add(itemInFront.collider);
 
+        while (true)
+        {
+            var next = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, rayCastDist);
+
+            // If empty space or blockage found return.
+            // If empty space
+            if (next.collider == null || next.collider.isTrigger)
+            {
+                break;
+            }
+            else if (next.collider != null && next.collider.gameObject.tag != "Pushable")
+            {
+                break;
+            }
+
+            adjacentPushablesInDirection.Add(next.collider);
         }
+
+        // if last pushable raycast is NOT an empty space we return.
+        var lastItem = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, rayCastDist);
+        if (lastItem.collider != null|| (lastItem.collider != null && !lastItem.collider.isTrigger))
+        {
+            return;
+        }
+
+        adjacentPushablesInDirection.Reverse();
+        foreach (var pushable in adjacentPushablesInDirection)
+        {
+            // TODO rewrite this whole function so only Translate in 1 place and use MoveBy instead.
+            pushable.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
+            this.SnapToGrid(pushable.transform);
+
+            Debug.Log($"moved {pushable.name} to {pushable.transform.position}");
+        }
+
+        this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
+        this.SnapToGrid();
     }
 }

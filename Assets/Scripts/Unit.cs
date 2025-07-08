@@ -16,13 +16,14 @@ namespace Assets.Scripts
     {
         public bool IsTouchingAnotherOfSameColour => this.IsAdjacentToSameColour();
 
-        [SerializeField] private float raycastRadius = 1.5f;
+        public float raycastDistance = 0.1f;
 
         public TileColour GetUnitColour => this.squareColour.ThisGuysColour;
 
         private GameColour squareColour;
 
         private Animator animator;
+
         private void Start()
         {
             this.squareColour = GetComponent<GameColour>();
@@ -31,7 +32,6 @@ namespace Assets.Scripts
 
         private bool IsAdjacentToSameColour()
         {
-
             var nearby = this.NearbyGuys();
 
             if (nearby == null || !nearby.Any())
@@ -62,13 +62,17 @@ namespace Assets.Scripts
 
             foreach (var direction in directions)
             {
-                var hits = Physics2D.RaycastAll(this.transform.position, direction, 1f);
-                allHits.AddRange(hits);
+                var hits = Physics2D.Raycast(this.transform.position, direction, raycastDistance);
+                if (hits.collider == null)
+                {
+                    continue;
+                }
+
+                allHits.Add(hits);//check this is not the player
             }
 
-            return allHits
-                .Select(x => x.collider.GetComponent<Unit>())
-                .Where(x => x != null && !Popped.hasPopped.Contains(x));
+            return allHits.Where(x => x.collider != null).Select(x => x.collider.GetComponent<Unit>())
+                .Where(x => x != null && !Popped.hasPopped.Contains(x) && x.gameObject != this.gameObject);
         }
 
         public void Pop()
@@ -89,7 +93,7 @@ namespace Assets.Scripts
             }
 
             var adjacent = this.NearbyGuys();
-            foreach (var guy in adjacent)
+            foreach (var guy in adjacent) // Directly 1 block in each 4 directions.
             {
                 if (guy.squareColour.ThisGuysColour != squareColour.ThisGuysColour)
                 {
