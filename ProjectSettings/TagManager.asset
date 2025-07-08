@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Pushable
   layers:
   - Default
   - TransparentFX
@@ -43,6 +44,9 @@ TagManager:
     locked: 0
   - name: Guy
     uniqueID: 365647285
+    locked: 0
+  - name: Zs
+    uniqueID: 2160566191
     locked: 0
   m_RenderingLayers:
   - Default

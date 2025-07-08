@@ -15,9 +15,10 @@ GameObject:
   - component: {fileID: 8343813292054329215}
   - component: {fileID: -7725764872816209049}
   - component: {fileID: -6286380708211593370}
+  - component: {fileID: 3085560602192712863}
   m_Layer: 0
   m_Name: CubeGuy
-  m_TagString: Untagged
+  m_TagString: Pushable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -116,7 +117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a0761645c66dfd458859caced55617e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Colour: 0
+  ThisGuysColour: 0
 --- !u!114 &8343813292054329215
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -203,3 +204,25 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!95 &3085560602192712863
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3676338562320534904}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 27bda5b99b8dbdf43a014b6c574b0260, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

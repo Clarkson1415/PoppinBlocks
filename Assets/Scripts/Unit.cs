@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -12,30 +11,64 @@ namespace Assets.Scripts
     /// </summary>
     [RequireComponent(typeof(MoveOnGrid))]
     [RequireComponent(typeof(GameColour))]
+    [RequireComponent(typeof(Animator))]
     public class Unit : MonoBehaviour
     {
-        public bool IsTouchingAnother => NearbyGuys().Select(x => x.squareColour.ThisGuysColour).Contains(this.squareColour.ThisGuysColour);
+        public bool IsTouchingAnotherOfSameColour => this.IsAdjacentToSameColour();
 
         [SerializeField] private float raycastRadius = 1.5f;
 
+        public TileColour GetUnitColour => this.squareColour.ThisGuysColour;
+
         private GameColour squareColour;
 
+        private Animator animator;
         private void Start()
         {
             this.squareColour = GetComponent<GameColour>();
+            this.animator = GetComponent<Animator>();
+        }
+
+        private bool IsAdjacentToSameColour()
+        {
+
+            var nearby = this.NearbyGuys();
+
+            if (nearby == null || !nearby.Any())
+            {
+                return false;
+            }
+
+            var nearbyColours = nearby.Select(x => x.squareColour.ThisGuysColour);
+            if (nearbyColours == null || !nearbyColours.Any())
+            {
+                return false;
+            }
+
+            if (!nearbyColours.Contains(this.squareColour.ThisGuysColour))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private IEnumerable<Unit> NearbyGuys()
         {
             // Only check in 4 directions. corner to corner not allowed.
             // see playermvoement do same but for 4.
+            var directions = new Vector2[] { Vector2.up, Vector2.right, Vector2.down, Vector2.left };
+            var allHits = new List<RaycastHit2D>();
 
-            RaycastHit2D[] hits = Physics2D.RaycastAll(this.transform.position, Vector2.up, 1f);
-            hits.Concat(Physics2D.RaycastAll(this.transform.position, Vector2.right, 1f));
-            hits.Concat(Physics2D.RaycastAll(this.transform.position, Vector2.down, 1f));
-            hits.Concat(Physics2D.RaycastAll(this.transform.position, Vector2.left, 1f));
+            foreach (var direction in directions)
+            {
+                var hits = Physics2D.RaycastAll(this.transform.position, direction, 1f);
+                allHits.AddRange(hits);
+            }
 
-            return hits.Select(x => x.collider.GetComponent<Unit>()).Where(x => !Popped.hasPopped.Contains(x));
+            return allHits
+                .Select(x => x.collider.GetComponent<Unit>())
+                .Where(x => x != null && !Popped.hasPopped.Contains(x));
         }
 
         public void Pop()
@@ -48,13 +81,15 @@ namespace Assets.Scripts
             // anyway if this is the last unit in the touch sequence to pop then trigger win screen.
             Debug.Log($"pop this: {this.gameObject.name}");
             Popped.hasPopped.Add(this);
+            this.animator.SetTrigger("Pop");
 
-            if (!this.IsTouchingAnother)
+            if (!this.IsTouchingAnotherOfSameColour)
             {
                 return;
             }
 
-            foreach (var guy in this.NearbyGuys())
+            var adjacent = this.NearbyGuys();
+            foreach (var guy in adjacent)
             {
                 if (guy.squareColour.ThisGuysColour != squareColour.ThisGuysColour)
                 {
