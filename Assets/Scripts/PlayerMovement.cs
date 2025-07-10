@@ -1,14 +1,10 @@
 ﻿using EasyTransition;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
-using UnityEngine.Analytics;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 #nullable enable
 
 namespace Assets.Scripts
@@ -21,11 +17,13 @@ namespace Assets.Scripts
         /// </summary>
         [SerializeField] private ColouredUnit? NextPlayer;
 
+        private AudioSource moveAudio;
+
         /// <summary>
         /// At least 1 player in scene has to start!
         /// </summary>
         [SerializeField] private bool ThisIsTheStartingPlayer;
-        
+
         [SerializeField] private TransitionSettings transition;
 
         private Vector2 moveInput;
@@ -34,7 +32,7 @@ namespace Assets.Scripts
 
         private void Start()
         {
-            Popped.hasPopped.Clear();
+            Popped.ToPopOrIsPopping.Clear();
 
             moveOnGrid = GetComponent<MoveOnGrid>();
             unitColour = GetComponent<ColouredUnit>();
@@ -50,6 +48,8 @@ namespace Assets.Scripts
                 this.GetComponent<PlayerInput>().defaultActionMap = "Player";
                 this.GetComponent<PlayerInput>().enabled = true;
             }
+
+            moveAudio = this.GetComponent<AudioSource>();
         }
 
         /// <summary>
@@ -77,9 +77,7 @@ namespace Assets.Scripts
             if (!context.started)
                 return;
 
-            Debug.Log("Move");
-
-            if (Popped.hasPopped.Contains(this.unitColour))
+            if (Popped.ToPopOrIsPopping.Contains(this.unitColour))
             {
                 return;
             }
@@ -95,47 +93,48 @@ namespace Assets.Scripts
             else
                 return;
 
-            this.moveOnGrid.MoveBy(moveInput);
+            var wasMoved = this.moveOnGrid.TryMoveBy(moveInput);
+
+            if (wasMoved)
+            {
+                this.moveAudio.Play();
+            }
 
             Physics2D.SyncTransforms(); // Sync colliders to transforms.
 
             // check if touching another of the same colour.
-            if (!this.unitColour.IsTouchingAnotherOfSameColour)// see if npc2 here is at position 1, 2 like it should be
+            if (!this.unitColour.IsTouchingAnotherOfSameColour)
             {
                 return;
             }
 
-            // this.unit.pop
-            // intead get pop chain then pop
-            // this.unitCOlour.AddAllInChainToPopped()
-
-
-            // for all in popped.Pop do pop with time delay.
             this.unitColour.AddToPopChain();
 
-
-            StartCoroutine(WaitForPopsThenAssessGameState());
+            waitForAllPops ??= StartCoroutine(WaitForPopsThenAssessGameState());
         }
+
+        private Coroutine? waitForAllPops;
 
         IEnumerator WaitForPopsThenAssessGameState()
         {
-            foreach (var item in Popped.hasPopped)
+            foreach (var item in Popped.ToPopOrIsPopping.Where(x => x.gameObject.activeSelf))
             {
                 item.Pop();
                 yield return new WaitForSeconds(0.2f);
             }
 
             // while not all are finished popping wait.
-            while (!Popped.hasPopped.All(x => x.animator.GetCurrentAnimatorStateInfo(0).IsName("Blank")))
+            while (!Popped.ToPopOrIsPopping.Where(x => x.gameObject.activeSelf).All(x => x.animator.GetCurrentAnimatorStateInfo(0).IsName("Blank")))
             {
                 yield return null;
             }
 
             // Won if all the objects have been popped.
             var all = FindObjectsByType<ColouredUnit>(FindObjectsSortMode.None);
-            if (all.All(x => Popped.hasPopped.Contains(x)))
+            if (all.All(x => Popped.ToPopOrIsPopping.Contains(x)))
             {
-                StartCoroutine(WaitThenComplete());
+                GameLevels.LevelCompleted(transition);
+                waitForAllPops = null;
                 yield break;
             }
 
@@ -143,20 +142,39 @@ namespace Assets.Scripts
             if (this.IsFailed(all))
             {
                 Debug.Log("You failed enter to restart.");
-                yield break;
+            }
+
+            // deactivate all popped objects
+            foreach (var square in Popped.ToPopOrIsPopping)
+            {
+                square.gameObject.SetActive(false);
             }
 
             // if another player other than this player, transfer controls.
             if (all.Any(x => x.TryGetComponent<PlayerMovement>(out var playernext) && playernext != this))
             {
-                StartCoroutine(WaitForPoppedAnimThenDeactivateThenChangePlayer());//TODO later this should be in the unit.Pop() function after Pop wait for finish animation then deactivate itself.
-                yield break;
+                if (this.NextPlayer == null)
+                {
+                    Debug.LogError($"NO next player. {this.name}");
+                    throw new NullReferenceException("No next player but need one.");
+                }
+
+                this.GetComponent<PlayerInput>().defaultActionMap = "NotCurrentPlayer";
+                this.GetComponent<PlayerInput>().enabled = false;
+
+                this.NextPlayer.GetComponent<PlayerInput>().enabled = true;
+                this.NextPlayer.GetComponent<PlayerInput>().defaultActionMap = "Player";
+                this.NextPlayer.GetComponent<PlayerInput>().SwitchCurrentActionMap("Player");
+
+                this.gameObject.SetActive(false);
             }
+
+            waitForAllPops = null;
         }
 
         private bool IsFailed(ColouredUnit[] allUnits)
         {
-            var unpopped = allUnits.Where(x => !Popped.hasPopped.Contains(x));
+            var unpopped = allUnits.Where(x => !Popped.ToPopOrIsPopping.Contains(x));
 
             // if any players without a corresponding other ColouredUnit = fail
             // if any coloured units without a corresponding other player COlouredunit = fail
@@ -164,52 +182,6 @@ namespace Assets.Scripts
             // or what if I can change their colour at some Point?
             Debug.Log("Todo fail checks");
             return false;
-        }
-
-        IEnumerator WaitForPoppedAnimThenDeactivateThenChangePlayer()
-        {
-            Debug.LogWarning("TODO all animations to finish then deactivate."); 
-            // or maybe put in the coloured unti class to use its own animator silly.
-            yield return new WaitForSeconds(0.8f);
-
-            if (this.NextPlayer == null)
-            {
-                Debug.LogError($"NO next player. {this.name}");
-                throw new NullReferenceException("No next player but need one.");
-            }
-
-            this.GetComponent<PlayerInput>().defaultActionMap = "NotCurrentPlayer";
-            this.GetComponent<PlayerInput>().enabled = false;
-
-            this.NextPlayer.GetComponent<PlayerInput>().enabled = true;
-            this.NextPlayer.GetComponent<PlayerInput>().defaultActionMap = "Player";
-            this.NextPlayer.GetComponent<PlayerInput>().SwitchCurrentActionMap("Player");
-
-
-            foreach (var popped in Popped.hasPopped)
-            {
-                if (popped == null)
-                {
-                    continue;
-                }
-
-                if (popped.IsDestroyed()) 
-                {
-                    continue;
-                }
-
-                if (popped.gameObject == null)
-                {
-                    continue;
-                }
-
-                if (!popped.gameObject.activeSelf)
-                {
-                    continue;
-                }
-
-                popped.gameObject.SetActive(false);
-            }
         }
 
         public void Restart(InputAction.CallbackContext context)
@@ -221,13 +193,6 @@ namespace Assets.Scripts
 
             Debug.Log("Restarting...");
             GameLevels.Reload(transition);
-        }
-
-        private IEnumerator WaitThenComplete()
-        {
-            Debug.Log("wait for all animations to finish then show level completed.");
-            yield return new WaitForSeconds(1f);
-            GameLevels.LevelCompleted(transition);
         }
     }
 }

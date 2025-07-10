@@ -276,4 +276,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NextPlayer: {fileID: 0}
   ThisIsTheStartingPlayer: 1
-  transition: {fileID: 11400000, guid: 057babd6f13132c449650d99e3c4e99c, type: 2}
+  transition: {fileID: 11400000, guid: b577ec7af0d48c34a9d31ce17f830a8d, type: 2}

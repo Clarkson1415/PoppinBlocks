@@ -21,21 +21,21 @@ public class MoveOnGrid : MonoBehaviour
         transToSnap.position = new Vector3(Mathf.Round(transToSnap.position.x), Mathf.Round(transToSnap.position.y), Mathf.Round(transToSnap.position.z));
     }
 
-    private float rayCastDist => this.GetComponent<ColouredUnit>().raycastDistance;
+    private float RayCastDist => this.GetComponent<ColouredUnit>().RaycastDistance;
 
     /// <summary>
-    /// Move unit by offset.
+    /// Move unit by offset. Returns true if successful.
     /// </summary>
-    public void MoveBy(Vector2 moveBy)
+    public bool TryMoveBy(Vector2 moveBy)
     {
         // check if collider that is a not trigger is in movement direction
         // Cast the ray and ignore your own collider
-        RaycastHit2D itemInFront = Physics2D.Raycast(this.transform.position, moveBy, rayCastDist);
+        RaycastHit2D itemInFront = Physics2D.Raycast(this.transform.position, moveBy, RayCastDist);
 
         // if item in front is a blockage return
-        if (itemInFront.collider != null && !itemInFront.collider.isTrigger && itemInFront.collider.gameObject.tag != "Pushable")
+        if (itemInFront.collider != null && !itemInFront.collider.isTrigger && !itemInFront.collider.gameObject.CompareTag("Pushable"))
         {
-            return;
+            return false;
         }
 
         // If there is no item in front move and return.
@@ -43,18 +43,20 @@ public class MoveOnGrid : MonoBehaviour
         {
             this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
             this.SnapToGrid();
-            return;
+            return true;
         }
 
         // check if every object in a chain of that direction is pushable recursively? if so move all the objects by 1 unit by moveBy
         // Get all adjacent pushable items in the direction.
         // If there is a collider thats not "Pushable" or an IsTrigger dont push.
-        var adjacentPushablesInDirection = new List<Collider2D>();
-        adjacentPushablesInDirection.Add(itemInFront.collider);
+        var adjacentPushablesInDirection = new List<Collider2D>
+        {
+            itemInFront.collider
+        };
 
         while (true)
         {
-            var next = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, rayCastDist);
+            var next = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, RayCastDist);
 
             // If empty space or blockage found return.
             // If empty space
@@ -66,19 +68,22 @@ public class MoveOnGrid : MonoBehaviour
             {
                 break;
             }
-            else if (next.collider != null && next.collider.gameObject.tag != "Pushable")
+            else if (next.collider != null && !next.collider.gameObject.CompareTag("Pushable"))
             {
                 break;
             }
 
-            adjacentPushablesInDirection.Add(next.collider);
+            if (next.collider != null)
+            {
+                adjacentPushablesInDirection.Add(next.collider);
+            }
         }
 
-        // if last pushable raycast is NOT an empty space we return.
-        var lastItem = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, rayCastDist);
+        // if last pushable raycast is NOT an empty space we return. did NOT move.
+        var lastItem = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, RayCastDist);
         if (lastItem.collider != null|| (lastItem.collider != null && !lastItem.collider.isTrigger))
         {
-            return;
+            return false;
         }
 
         adjacentPushablesInDirection.Reverse();
@@ -93,5 +98,6 @@ public class MoveOnGrid : MonoBehaviour
 
         this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
         this.SnapToGrid();
+        return true;
     }
 }

@@ -30,7 +30,7 @@ namespace Assets.Scripts
 
         public static void Reload(TransitionSettings setting)
         {
-            LoadLevel(setting, CurrentLevel);
+            SceneManager.LoadScene(CurrentLevel);
         }
     }
 }

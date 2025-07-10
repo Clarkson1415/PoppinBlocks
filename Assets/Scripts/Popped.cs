@@ -5,6 +5,6 @@ namespace Assets.Scripts
 {
     public static class Popped
     {
-        public static List<ColouredUnit> hasPopped = new();
+        public static List<ColouredUnit> ToPopOrIsPopping = new();
     }
 }

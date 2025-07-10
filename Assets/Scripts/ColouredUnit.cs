@@ -13,7 +13,7 @@ namespace Assets.Scripts
     {
         public TileColour ThisGuysColour;
         
-        public float raycastDistance = 0.6f;
+        public float RaycastDistance = 0.6f;
 
         public Animator animator;
 
@@ -26,6 +26,11 @@ namespace Assets.Scripts
             this.GetComponent<SpriteRenderer>().color = RegisteredColours.GetColor(this.ThisGuysColour);
             this.animator = GetComponent<Animator>();
             this.randomSoundPlayer = this.GetComponentInChildren<RandomSoundPlayer>();
+
+            if (this.randomSoundPlayer == null)
+            {
+                Debug.LogError($"No random sound player on {this.name}");
+            }
         }
 
         private bool IsAdjacentToSameColour()
@@ -64,7 +69,7 @@ namespace Assets.Scripts
 
             foreach (var direction in directions)
             {
-                var hits = Physics2D.Raycast(this.transform.position, direction, this.raycastDistance);
+                var hits = Physics2D.Raycast(this.transform.position, direction, this.RaycastDistance);
                 if (hits.collider == null)
                 {
                     continue;
@@ -74,17 +79,17 @@ namespace Assets.Scripts
             }
 
             return allHits.Where(x => x.collider != null).Select(x => x.collider.GetComponent<ColouredUnit>())
-                .Where(x => x != null && !Popped.hasPopped.Contains(x) && x.gameObject != this.gameObject);
+                .Where(x => x != null && !Popped.ToPopOrIsPopping.Contains(x) && x.gameObject != this.gameObject);
         }
 
         public void AddToPopChain()
         {
-            if (Popped.hasPopped.Contains(this))
+            if (Popped.ToPopOrIsPopping.Contains(this))
             {
                 return;
             }
 
-            Popped.hasPopped.Add(this);
+            Popped.ToPopOrIsPopping.Add(this);
 
             if (!this.IsTouchingAnotherOfSameColour)
             {
@@ -110,8 +115,7 @@ namespace Assets.Scripts
 
         private IEnumerator DelayThenPop()
         {
-            yield return new WaitForSeconds(0.3f);
-
+            yield return new WaitForSeconds(0.2f);
             // if this is touching another of same colour and active.
             // trigger pop on those ones.
             // then play pop animation on this one. then deactivate.
@@ -123,11 +127,13 @@ namespace Assets.Scripts
             StartCoroutine(WaitThenPlayAPopSound());
         }
 
-        [SerializeField] private float popAnimTimeTillSound = 0.4f;
-
         IEnumerator WaitThenPlayAPopSound()
         {
-            yield return new WaitForSeconds(popAnimTimeTillSound);
+            while (!this.animator.GetCurrentAnimatorStateInfo(0).IsName("PopParticles"))
+            {
+                yield return null;
+            }
+
             this.randomSoundPlayer.PlayRandomSound();
         }
     }
