@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6613984212190573841}
   - component: {fileID: -5240879685451824569}
   m_Layer: 0
-  m_Name: Blockage
+  m_Name: InvisibleBlockage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

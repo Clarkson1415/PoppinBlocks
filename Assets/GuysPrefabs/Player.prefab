@@ -28,13 +28,17 @@ PrefabInstance:
       propertyPath: m_CollisionDetection
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3085560602192712863, guid: 2e9e581ed29bd9844b621a1c3615ee74, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 22100000, guid: 3d4abae9e14029744bb17431e690ae3d, type: 2}
     - target: {fileID: 3676338562320534904, guid: 2e9e581ed29bd9844b621a1c3615ee74, type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 7448216668129286637, guid: 2e9e581ed29bd9844b621a1c3615ee74, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7448216668129286637, guid: 2e9e581ed29bd9844b621a1c3615ee74, type: 3}
       propertyPath: m_LocalPosition.y
@@ -95,7 +99,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1469372831648218841}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
   m_Name: 
@@ -217,8 +221,44 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 8ff2de50-7ae6-4441-a5cd-4c87c01ec07d
     m_ActionName: 'Player/IToRestart[/Keyboard/i]'
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: -3432479524713836862}
+        m_TargetAssemblyTypeName: Assets.Scripts.PlayerMovement, Assembly-CSharp
+        m_MethodName: OnNumber
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 5f132a8d-b3bd-48c7-859f-891a112f662b
+    m_ActionName: 'Player/Number[/Keyboard/0,/Keyboard/1,/Keyboard/2,/Keyboard/3,/Keyboard/4,/Keyboard/5,/Keyboard/6,/Keyboard/7,/Keyboard/8,/Keyboard/9]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 13ebc211-d704-442c-a6f2-8ad58f617d2a
+    m_ActionName: New action map/New action
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: -3432479524713836862}
+        m_TargetAssemblyTypeName: Assets.Scripts.PlayerMovement, Assembly-CSharp
+        m_MethodName: Quit
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 3309c2d4-c1cd-4369-b597-62a2e328cd55
+    m_ActionName: 'Player/ESC[/Keyboard/escape]'
+  m_NeverAutoSwitchControlSchemes: 1
+  m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}

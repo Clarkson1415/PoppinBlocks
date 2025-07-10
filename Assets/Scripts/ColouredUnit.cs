@@ -1,32 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
-#nullable enable
 
 namespace Assets.Scripts
 {
     /// <summary>
-    /// Represents a square guy.
+    /// Represents something poppable.
     /// </summary>
-    [RequireComponent(typeof(MoveOnGrid))]
-    [RequireComponent(typeof(GameColour))]
-    [RequireComponent(typeof(Animator))]
-    public class Unit : MonoBehaviour
+    public class ColouredUnit : MonoBehaviour
     {
-        public bool IsTouchingAnotherOfSameColour => this.IsAdjacentToSameColour();
-
-        public float raycastDistance = 0.1f;
-
-        public TileColour GetUnitColour => this.squareColour.ThisGuysColour;
-
-        private GameColour squareColour;
+        public TileColour ThisGuysColour;
+        
+        public float raycastDistance = 0.6f;
 
         private Animator animator;
+        public bool IsTouchingAnotherOfSameColour => this.IsAdjacentToSameColour();
 
         private void Start()
         {
-            this.squareColour = GetComponent<GameColour>();
+            this.GetComponent<SpriteRenderer>().color = RegisteredColours.GetColor(this.ThisGuysColour);
             this.animator = GetComponent<Animator>();
         }
 
@@ -39,13 +31,13 @@ namespace Assets.Scripts
                 return false;
             }
 
-            var nearbyColours = nearby.Select(x => x.squareColour.ThisGuysColour);
-            if (nearbyColours == null || !nearbyColours.Any())
+            var nearbyColouredUnits = nearby.Select(x => x.ThisGuysColour == this.ThisGuysColour);
+            if (nearbyColouredUnits == null || !nearbyColouredUnits.Any())
             {
                 return false;
             }
 
-            if (!nearbyColours.Contains(this.squareColour.ThisGuysColour))
+            if (!nearbyColouredUnits.Contains(this))
             {
                 return false;
             }
@@ -53,7 +45,11 @@ namespace Assets.Scripts
             return true;
         }
 
-        private IEnumerable<Unit> NearbyGuys()
+        /// <summary>
+        /// Nearby OBjects of all colours.
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<ColouredUnit> NearbyGuys()
         {
             // Only check in 4 directions. corner to corner not allowed.
             // see playermvoement do same but for 4.
@@ -62,7 +58,7 @@ namespace Assets.Scripts
 
             foreach (var direction in directions)
             {
-                var hits = Physics2D.Raycast(this.transform.position, direction, raycastDistance);
+                var hits = Physics2D.Raycast(this.transform.position, direction, this.raycastDistance);
                 if (hits.collider == null)
                 {
                     continue;
@@ -71,10 +67,9 @@ namespace Assets.Scripts
                 allHits.Add(hits);//check this is not the player
             }
 
-            return allHits.Where(x => x.collider != null).Select(x => x.collider.GetComponent<Unit>())
+            return allHits.Where(x => x.collider != null).Select(x => x.collider.GetComponent<ColouredUnit>())
                 .Where(x => x != null && !Popped.hasPopped.Contains(x) && x.gameObject != this.gameObject);
         }
-
         public void Pop()
         {
             // if this is touching another of same colour and active.
@@ -84,6 +79,12 @@ namespace Assets.Scripts
             // if this is the last unit to pop. idk how to check for that because if I check none touching it then could be multiple ends.
             // anyway if this is the last unit in the touch sequence to pop then trigger win screen.
             Debug.Log($"pop this: {this.gameObject.name}");
+
+            if (Popped.hasPopped.Contains(this))
+            {
+                return;
+            }
+
             Popped.hasPopped.Add(this);
             this.animator.SetTrigger("Pop");
 
@@ -95,7 +96,7 @@ namespace Assets.Scripts
             var adjacent = this.NearbyGuys();
             foreach (var guy in adjacent) // Directly 1 block in each 4 directions.
             {
-                if (guy.squareColour.ThisGuysColour != squareColour.ThisGuysColour)
+                if (guy.ThisGuysColour != this.ThisGuysColour)
                 {
                     continue;
                 }

@@ -21,7 +21,7 @@ public class MoveOnGrid : MonoBehaviour
         transToSnap.position = new Vector3(Mathf.Round(transToSnap.position.x), Mathf.Round(transToSnap.position.y), Mathf.Round(transToSnap.position.z));
     }
 
-    private float rayCastDist => this.GetComponent<Unit>().raycastDistance;
+    private float rayCastDist => this.GetComponent<ColouredUnit>().raycastDistance;
 
     /// <summary>
     /// Move unit by offset.
@@ -41,7 +41,7 @@ public class MoveOnGrid : MonoBehaviour
         // If there is no item in front move and return.
         if (itemInFront.collider == null || itemInFront.collider.isTrigger)
         {
-            this.rb.Translate(new Vector3(moveBy.x, moveBy.y, 0));
+            this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
             this.SnapToGrid();
             return;
         }
@@ -58,7 +58,11 @@ public class MoveOnGrid : MonoBehaviour
 
             // If empty space or blockage found return.
             // If empty space
-            if (next.collider == null || next.collider.isTrigger)
+            if (next.collider == null)
+            {
+                break;
+            }
+            else if (next.collider.isTrigger) 
             {
                 break;
             }
