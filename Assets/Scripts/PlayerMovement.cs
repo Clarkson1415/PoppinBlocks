@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EasyTransition;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,8 @@ namespace Assets.Scripts
         /// At least 1 player in scene has to start!
         /// </summary>
         [SerializeField] private bool ThisIsTheStartingPlayer;
+        
+        [SerializeField] private TransitionSettings transition;
 
         private Vector2 moveInput;
         private MoveOnGrid moveOnGrid;
@@ -56,7 +59,7 @@ namespace Assets.Scripts
         public void OnNumber(InputAction.CallbackContext context)
         {
             var numKey = context.control.name;
-            GameLevels.LoadLevel($"Level {numKey}");
+            GameLevels.LoadLevel(transition, $"Level {numKey}");
         }
 
         public void Quit(InputAction.CallbackContext context)
@@ -103,28 +106,51 @@ namespace Assets.Scripts
             }
 
             // this.unit.pop
-            this.unitColour.Pop();
+            // intead get pop chain then pop
+            // this.unitCOlour.AddAllInChainToPopped()
+
+
+            // for all in popped.Pop do pop with time delay.
+            this.unitColour.AddToPopChain();
+
+
+            StartCoroutine(WaitForPopsThenAssessGameState());
+        }
+
+        IEnumerator WaitForPopsThenAssessGameState()
+        {
+            foreach (var item in Popped.hasPopped)
+            {
+                item.Pop();
+                yield return new WaitForSeconds(0.2f);
+            }
+
+            // while not all are finished popping wait.
+            while (!Popped.hasPopped.All(x => x.animator.GetCurrentAnimatorStateInfo(0).IsName("Blank")))
+            {
+                yield return null;
+            }
 
             // Won if all the objects have been popped.
             var all = FindObjectsByType<ColouredUnit>(FindObjectsSortMode.None);
             if (all.All(x => Popped.hasPopped.Contains(x)))
             {
                 StartCoroutine(WaitThenComplete());
-                return;
+                yield break;
             }
 
             // check fail conditions here:
             if (this.IsFailed(all))
             {
                 Debug.Log("You failed enter to restart.");
-                return;
+                yield break;
             }
-            
+
             // if another player other than this player, transfer controls.
             if (all.Any(x => x.TryGetComponent<PlayerMovement>(out var playernext) && playernext != this))
             {
                 StartCoroutine(WaitForPoppedAnimThenDeactivateThenChangePlayer());//TODO later this should be in the unit.Pop() function after Pop wait for finish animation then deactivate itself.
-                return;
+                yield break;
             }
         }
 
@@ -142,9 +168,9 @@ namespace Assets.Scripts
 
         IEnumerator WaitForPoppedAnimThenDeactivateThenChangePlayer()
         {
-            Debug.Log("todo for all animations to finish then deactivate."); 
+            Debug.LogWarning("TODO all animations to finish then deactivate."); 
             // or maybe put in the coloured unti class to use its own animator silly.
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.8f);
 
             if (this.NextPlayer == null)
             {
@@ -194,14 +220,14 @@ namespace Assets.Scripts
             }
 
             Debug.Log("Restarting...");
-            GameLevels.Reload();
+            GameLevels.Reload(transition);
         }
 
         private IEnumerator WaitThenComplete()
         {
             Debug.Log("wait for all animations to finish then show level completed.");
             yield return new WaitForSeconds(1f);
-            GameLevels.LevelCompleted();
+            GameLevels.LevelCompleted(transition);
         }
     }
 }
