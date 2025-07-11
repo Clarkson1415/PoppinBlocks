@@ -23,7 +23,7 @@ namespace Assets.Scripts
 
         private void Start()
         {
-            this.GetComponent<SpriteRenderer>().color = RegisteredColours.GetColor(this.ThisGuysColour);
+            this.UpdateColor();
             this.animator = GetComponent<Animator>();
             this.randomSoundPlayer = this.GetComponentInChildren<RandomSoundPlayer>();
 
@@ -79,17 +79,17 @@ namespace Assets.Scripts
             }
 
             return allHits.Where(x => x.collider != null).Select(x => x.collider.GetComponent<ColouredUnit>())
-                .Where(x => x != null && !Popped.ToPopOrIsPopping.Contains(x) && x.gameObject != this.gameObject);
+                .Where(x => x != null && !Popped.ToPopHasPoppedOrIsPopping.Contains(x) && x.gameObject != this.gameObject);
         }
 
         public void AddToPopChain()
         {
-            if (Popped.ToPopOrIsPopping.Contains(this))
+            if (Popped.ToPopHasPoppedOrIsPopping.Contains(this))
             {
                 return;
             }
 
-            Popped.ToPopOrIsPopping.Add(this);
+            Popped.ToPopHasPoppedOrIsPopping.Add(this);
 
             if (!this.IsTouchingAnotherOfSameColour)
             {
@@ -127,7 +127,7 @@ namespace Assets.Scripts
             StartCoroutine(WaitThenPlayAPopSound());
         }
 
-        IEnumerator WaitThenPlayAPopSound()
+        private IEnumerator WaitThenPlayAPopSound()
         {
             while (!this.animator.GetCurrentAnimatorStateInfo(0).IsName("PopParticles"))
             {
@@ -135,6 +135,17 @@ namespace Assets.Scripts
             }
 
             this.randomSoundPlayer.PlayRandomSound();
+        }
+
+        private void UpdateColor()
+        {
+            this.GetComponent<SpriteRenderer>().color = RegisteredColours.GetColor(this.ThisGuysColour);
+        }
+
+        public void ChangeColour(TileColour newColor)
+        {
+            this.ThisGuysColour = newColor;
+            UpdateColor();
         }
     }
 }

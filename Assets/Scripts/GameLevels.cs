@@ -28,7 +28,7 @@ namespace Assets.Scripts
             TransitionManager.Instance().Transition(CurrentLevel, setting, 0f);
         }
 
-        public static void Reload(TransitionSettings setting)
+        public static void Reload()
         {
             SceneManager.LoadScene(CurrentLevel);
         }

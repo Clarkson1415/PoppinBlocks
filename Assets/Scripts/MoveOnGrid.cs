@@ -80,8 +80,8 @@ public class MoveOnGrid : MonoBehaviour
         }
 
         // if last pushable raycast is NOT an empty space we return. did NOT move.
-        var lastItem = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, RayCastDist);
-        if (lastItem.collider != null|| (lastItem.collider != null && !lastItem.collider.isTrigger))
+        var ItemInfrontOfLastItem = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, RayCastDist);
+        if (ItemInfrontOfLastItem.collider != null && !ItemInfrontOfLastItem.collider.isTrigger)
         {
             return false;
         }
@@ -98,6 +98,7 @@ public class MoveOnGrid : MonoBehaviour
 
         this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
         this.SnapToGrid();
+
         return true;
     }
 }
