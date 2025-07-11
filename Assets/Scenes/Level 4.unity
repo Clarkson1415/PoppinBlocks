@@ -4062,6 +4062,10 @@ PrefabInstance:
       value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 4108912361062819149, guid: 449c6b6c7afae56449f5ada1c838735c, type: 3}
+      propertyPath: activePlayers.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4108912361062819149, guid: 449c6b6c7afae56449f5ada1c838735c, type: 3}
       propertyPath: 'activePlayers.Array.data[0]'
       value: 
       objectReference: {fileID: 1286914674}

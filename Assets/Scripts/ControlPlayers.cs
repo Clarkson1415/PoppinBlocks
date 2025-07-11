@@ -24,7 +24,7 @@ public class ControlPlayers : MonoBehaviour
 
     private WonLevelText WonLevelText;
 
-    private void Start()
+    private void Awake()
     {
         pauseScreen = FindFirstObjectByType<PauseScreen>();
 
@@ -79,6 +79,12 @@ public class ControlPlayers : MonoBehaviour
     {
         foreach (var player in activePlayers)
         {
+            if (player == null)
+            {
+                Debug.LogError("Grace did not assign players properly for the level.");
+                return;
+            }
+
             if (Popped.ToPopHasPoppedOrIsPopping.Contains(player.colouredUnit))
             {
                 continue;
@@ -88,6 +94,11 @@ public class ControlPlayers : MonoBehaviour
             {
                 player.colouredUnit.AddToPopChain();
             }
+        }
+
+        if (Popped.ToPopHasPoppedOrIsPopping.Count == 0)
+        {
+            return;
         }
 
         if (Popped.ToPopHasPoppedOrIsPopping.Any(x => x.gameObject.activeSelf))
@@ -125,13 +136,27 @@ public class ControlPlayers : MonoBehaviour
 
     private ColouredUnit[] allUnits = Array.Empty<ColouredUnit>();
 
+    [SerializeField] private float waitOnLevelCompleteScreen = 1f;
+
+    private IEnumerator LevelCompleteTextThenLoad()
+    {
+        this.WonLevelText.TurnOn();
+        while (!this.WonLevelText.IsFinishedAnimating)
+        {
+            yield return null;
+        }
+
+        yield return new WaitForSecondsRealtime(waitOnLevelCompleteScreen);
+
+        GameLevels.LevelCompleted(transition);
+    }
+
     private void CheckLevelState()
     {
         // if All Coloured Units are popped. Have finished level.
         if (allUnits.All(x => Popped.ToPopHasPoppedOrIsPopping.Contains(x)))
         {
-            GameLevels.LevelCompleted(transition);
-            this.WonLevelText.TurnOn();
+            StartCoroutine(LevelCompleteTextThenLoad());
             HaveWonLoadingNextScene = true;
             return;
         }
@@ -148,41 +173,41 @@ public class ControlPlayers : MonoBehaviour
         }
 
         // If no active players were popped this turn then return.
-        if (!activePlayers.Any(x => Popped.ToPopHasPoppedOrIsPopping.Contains(x.colouredUnit)))
-        {
-            return;
-        }
+        //if (!activePlayers.Any(x => Popped.ToPopHasPoppedOrIsPopping.Contains(x.colouredUnit)))
+        //{
+        //    return;
+        //}
 
         // if a player was popped. And we have not won. we need to try change controls or we failed the level - as fail check is not implemented yet.
-        if (allUnits.Any(x => !Popped.ToPopHasPoppedOrIsPopping.Contains(x) && x.TryGetComponent<PlayerMovement>(out var possiblePlayer)))
-        {
-            // if All active players have NO next player throw an error
-            if (activePlayers.All(x => x.NextPlayers.Count == 0))
-            {
-                Debug.LogWarning("There is another player in scene that is NOT assigned to any next player and is NOT an initial player.");
-            }
+        //if (allUnits.Any(x => !Popped.ToPopHasPoppedOrIsPopping.Contains(x) && x.TryGetComponent<PlayerMovement>(out var possiblePlayer)))
+        //{
+        //    // if All active players have NO next player throw an error
+        //    if (activePlayers.All(x => x.NextPlayers.Count == 0))
+        //    {
+        //        Debug.LogWarning("There is another player in scene that is NOT assigned to any next player and is NOT an initial player.");
+        //    }
 
-            ChangeOverPlayers();
-        }
+        //    ChangeOverPlayers();
+        //}
     }
 
-    private void ChangeOverPlayers()
-    {
-        // change active players to the current active players next player.
-        List<PlayerMovement> newActivePlayers = new();
+    //private void ChangeOverPlayers()
+    //{
+    //    // change active players to the current active players next player.
+    //    List<PlayerMovement> newActivePlayers = new();
 
-        // Keep players that did not pop
-        newActivePlayers.AddRange(activePlayers.Where(x => !Popped.ToPopHasPoppedOrIsPopping.Contains(x.colouredUnit)));
+    //    // Keep players that did not pop
+    //    newActivePlayers.AddRange(activePlayers.Where(x => !Popped.ToPopHasPoppedOrIsPopping.Contains(x.colouredUnit)));
 
-        // For all popped players change controls over or not if the list is empty anyways.
-        var activePlayersThatPopped = activePlayers.Where(x => Popped.ToPopHasPoppedOrIsPopping.Contains(x.colouredUnit));
-        foreach (var poppedPlayer in activePlayersThatPopped)
-        {
-            newActivePlayers.AddRange(poppedPlayer.NextPlayers);
-        }
+    //    // For all popped players change controls over or not if the list is empty anyways.
+    //    var activePlayersThatPopped = activePlayers.Where(x => Popped.ToPopHasPoppedOrIsPopping.Contains(x.colouredUnit));
+    //    foreach (var poppedPlayer in activePlayersThatPopped)
+    //    {
+    //        newActivePlayers.AddRange(poppedPlayer.NextPlayers);
+    //    }
 
-        activePlayers = newActivePlayers;
-    }
+    //    activePlayers = newActivePlayers;
+    //}
 
     private bool IsFailed()
     {

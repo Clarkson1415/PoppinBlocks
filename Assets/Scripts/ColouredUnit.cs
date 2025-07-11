@@ -21,9 +21,8 @@ namespace Assets.Scripts
 
         private RandomSoundPlayer randomSoundPlayer;
 
-        private void Start()
+        private void Awake()
         {
-            this.UpdateColor();
             this.animator = GetComponent<Animator>();
             this.randomSoundPlayer = this.GetComponentInChildren<RandomSoundPlayer>();
 
@@ -31,6 +30,11 @@ namespace Assets.Scripts
             {
                 Debug.LogError($"No random sound player on {this.name}");
             }
+        }
+
+        private void Start()
+        {
+            this.UpdateColor();
         }
 
         private bool IsAdjacentToSameColour()
