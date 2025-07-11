@@ -1,5 +1,6 @@
 using Assets.Scripts;
 using EasyTransition;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,9 @@ public class ControlPlayers : MonoBehaviour
     private PauseScreen pauseScreen;
 
     private Vector2 moveInput;
+
+    private WonLevelText WonLevelText;
+
     private void Start()
     {
         pauseScreen = FindFirstObjectByType<PauseScreen>();
@@ -32,6 +36,10 @@ public class ControlPlayers : MonoBehaviour
         {
             Debug.LogError("Forgot to assign a player.");
         }
+
+        allUnits = FindObjectsByType<ColouredUnit>(FindObjectsSortMode.None);
+
+        WonLevelText = FindFirstObjectByType<WonLevelText>();
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -82,7 +90,10 @@ public class ControlPlayers : MonoBehaviour
             }
         }
 
-        waitForAllPops ??= StartCoroutine(PopAll());
+        if (Popped.ToPopHasPoppedOrIsPopping.Any(x => x.gameObject.activeSelf))
+        {
+            waitForAllPops ??= StartCoroutine(PopAll());
+        }
     }
 
     private bool AnyToPopAreNotPopped()
@@ -97,7 +108,7 @@ public class ControlPlayers : MonoBehaviour
         foreach (var item in Popped.ToPopHasPoppedOrIsPopping.Where(x => x.gameObject.activeSelf))
         {
             item.Pop();
-            yield return new WaitForSeconds(DelayBetweenPops);
+            yield return new WaitForSecondsRealtime(DelayBetweenPops);
         }
 
         while (AnyToPopAreNotPopped())
@@ -112,21 +123,22 @@ public class ControlPlayers : MonoBehaviour
 
     private bool HaveWonLoadingNextScene = false;
 
+    private ColouredUnit[] allUnits = Array.Empty<ColouredUnit>();
+
     private void CheckLevelState()
     {
         // if All Coloured Units are popped. Have finished level.
-        var allUnits = FindObjectsByType<ColouredUnit>(FindObjectsSortMode.None);
         if (allUnits.All(x => Popped.ToPopHasPoppedOrIsPopping.Contains(x)))
         {
             GameLevels.LevelCompleted(transition);
+            this.WonLevelText.TurnOn();
             HaveWonLoadingNextScene = true;
             return;
         }
 
         // check fail conditions here:
-        if (this.IsFailed(allUnits))
+        if (this.IsFailed())
         {
-            Debug.Log("Check fail conditions.");
         }
 
         // deactivate all popped objects
@@ -172,9 +184,10 @@ public class ControlPlayers : MonoBehaviour
         activePlayers = newActivePlayers;
     }
 
-    private bool IsFailed(ColouredUnit[] allUnits)
+    private bool IsFailed()
     {
-        var unpopped = allUnits.Where(x => !Popped.ToPopHasPoppedOrIsPopping.Contains(x));
+        // var unpopped = allUnits.Where(x => !Popped.ToPopHasPoppedOrIsPopping.Contains(x));
+        Debug.Log("Check fail conditions.");
 
         // if any players without a corresponding other ColouredUnit = fail
         // if any coloured units without a corresponding other player COlouredunit = fail

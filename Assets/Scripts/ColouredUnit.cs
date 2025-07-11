@@ -69,7 +69,7 @@ namespace Assets.Scripts
 
             foreach (var direction in directions)
             {
-                var hits = Physics2D.Raycast(this.transform.position, direction, this.RaycastDistance);
+                var hits = Physics2D.Raycast(this.transform.position, direction, RaycastDistance);
                 if (hits.collider == null)
                 {
                     continue;
