@@ -16,13 +16,6 @@ public class MoveOnGrid : MonoBehaviour
         this.transform.position = new Vector3(Mathf.Round(this.transform.position.x), Mathf.Round(transform.position.y), Mathf.Round(this.transform.position.z));
     }
 
-    private void SnapToGrid(Transform transToSnap)
-    {
-        transToSnap.position = new Vector3(Mathf.Round(transToSnap.position.x), Mathf.Round(transToSnap.position.y), Mathf.Round(transToSnap.position.z));
-    }
-
-    private float RayCastDist => this.GetComponent<ColouredUnit>().RaycastDistance;
-
     /// <summary>
     /// Move unit by offset. Returns true if successful.
     /// </summary>
@@ -30,7 +23,7 @@ public class MoveOnGrid : MonoBehaviour
     {
         // check if collider that is a not trigger is in movement direction
         // Cast the ray and ignore your own collider
-        RaycastHit2D itemInFront = Physics2D.Raycast(this.transform.position, moveBy, RayCastDist);
+        RaycastHit2D itemInFront = Physics2D.Raycast(this.transform.position, moveBy, ColouredUnit.RaycastDistance);
 
         // if item in front is a blockage return
         if (itemInFront.collider != null && !itemInFront.collider.isTrigger && !itemInFront.collider.gameObject.CompareTag("Pushable"))
@@ -56,7 +49,7 @@ public class MoveOnGrid : MonoBehaviour
 
         while (true)
         {
-            var next = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, RayCastDist);
+            var next = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, ColouredUnit.RaycastDistance);
 
             // If empty space or blockage found return.
             // If empty space
@@ -80,7 +73,7 @@ public class MoveOnGrid : MonoBehaviour
         }
 
         // if last pushable raycast is NOT an empty space we return. did NOT move.
-        var ItemInfrontOfLastItem = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, RayCastDist);
+        var ItemInfrontOfLastItem = Physics2D.Raycast(adjacentPushablesInDirection.Last().transform.position, moveBy, ColouredUnit.RaycastDistance);
         if (ItemInfrontOfLastItem.collider != null && !ItemInfrontOfLastItem.collider.isTrigger)
         {
             return false;
@@ -89,16 +82,24 @@ public class MoveOnGrid : MonoBehaviour
         adjacentPushablesInDirection.Reverse();
         foreach (var pushable in adjacentPushablesInDirection)
         {
-            // TODO rewrite this whole function so only Translate in 1 place and use MoveBy instead.
-            pushable.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
-            this.SnapToGrid(pushable.transform);
-
-            Debug.Log($"moved {pushable.name} to {pushable.transform.position}");
+            if (pushable.TryGetComponent<MoveOnGrid>(out var pushablesMover))
+            {
+                pushablesMover.MoveAndSnap(moveBy);
+            }
+            else
+            {
+                Debug.LogError($"Pushables should have move on grid missing on {this.name}");
+            }
         }
 
-        this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
-        this.SnapToGrid();
+        MoveAndSnap(moveBy);
 
         return true;
+    }
+
+    private void MoveAndSnap(Vector2 moveBy)
+    {
+        this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
+        this.SnapToGrid();
     }
 }

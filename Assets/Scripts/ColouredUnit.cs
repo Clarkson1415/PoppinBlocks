@@ -13,7 +13,7 @@ namespace Assets.Scripts
     {
         public TileColour ThisGuysColour;
         
-        public float RaycastDistance = 0.6f;
+        public static float RaycastDistance = 0.6f;
 
         public Animator animator;
 
