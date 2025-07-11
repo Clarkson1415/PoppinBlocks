@@ -11,7 +11,7 @@ namespace Assets.Scripts
         /// <summary>
         /// If there is another player in the level this player leads onto NextPLayer. Once this is popped.
         /// </summary>
-        public List<PlayerMovement>? NextPlayers = new();
+        public List<PlayerMovement> NextPlayers = new();
 
         [SerializeField] private TransitionSettings transition;
 

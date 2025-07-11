@@ -42,6 +42,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Swirler
+    uniqueID: 1097244529
+    locked: 0
   - name: Guy
     uniqueID: 365647285
     locked: 0

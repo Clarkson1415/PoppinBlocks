@@ -1,16 +1,23 @@
 ﻿using EasyTransition;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using UnityEngine;
 
 namespace Assets.Scripts
 {
     public static class GameLevels
     {
-        public static List<string> LevelNames = new() { "TitleScreen", "Level 1", "Level 2", "Level 3", "Level 4", "Level 5", "Level 6", "Level 7", "Level 8", "Level 9", "End" };
+        public static List<string> LevelNames = new() { "TitleScreen", "Level 1", "Level 2", "Level 3", "Level 4", "Level 5", "Level 6", "Level 7", "Level 8", "Level 9", "Level 10", "Level 11", "Level 12", "Level 13", "Level 14", "Level 15", "End" };
 
         public static string GetNextLevel()
         {
             var currentLevelIndex = LevelNames.IndexOf(CurrentLevel);
+
+            if (currentLevelIndex + 1 > LevelNames.Count)
+            {
+                Debug.LogError($"failed to get next level from. {CurrentLevel}");
+            }
+
             return LevelNames[currentLevelIndex + 1];
         }
 

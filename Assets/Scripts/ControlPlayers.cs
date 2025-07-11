@@ -1,11 +1,11 @@
 using Assets.Scripts;
 using EasyTransition;
 using System.Collections;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+#nullable enable
 
 [RequireComponent(typeof(AudioSource))]
 public class ControlPlayers : MonoBehaviour
@@ -19,6 +19,7 @@ public class ControlPlayers : MonoBehaviour
 
     private PauseScreen pauseScreen;
 
+    private Vector2 moveInput;
     private void Start()
     {
         pauseScreen = FindFirstObjectByType<PauseScreen>();
@@ -38,10 +39,8 @@ public class ControlPlayers : MonoBehaviour
         if (!context.started)
             return;
 
-        var moveInput = context.ReadValue<Vector2>();
+        moveInput = context.ReadValue<Vector2>();
 
-
-        // TODO put this in fixed update instead.
         foreach (var player in activePlayers)
         {
             if (Popped.ToPopHasPoppedOrIsPopping.Contains(player.colouredUnit))
@@ -55,11 +54,28 @@ public class ControlPlayers : MonoBehaviour
             {
                 this.moveAudio.Play();
             }
+        }
+    }
 
-            // Need to wait for OnTriggerEnter2D Events to update before this.
-            // ?
+    private void Update()
+    {
+        if (HaveWonLoadingNextScene)
+        {
+            return;
+        }
 
-            // check if any player is touching another of the same colour.
+        this.PopIfTouching();
+    }
+
+    private void PopIfTouching()
+    {
+        foreach (var player in activePlayers)
+        {
+            if (Popped.ToPopHasPoppedOrIsPopping.Contains(player.colouredUnit))
+            {
+                continue;
+            }
+
             if (player.colouredUnit.IsTouchingAnotherOfSameColour)
             {
                 player.colouredUnit.AddToPopChain();
@@ -74,12 +90,14 @@ public class ControlPlayers : MonoBehaviour
         return !Popped.ToPopHasPoppedOrIsPopping.Where(x => x.gameObject.activeSelf).All(x => x.animator.GetCurrentAnimatorStateInfo(0).IsName("Blank"));
     }
 
+    public float DelayBetweenPops = 0.2f;
+
     IEnumerator PopAll()
     {
         foreach (var item in Popped.ToPopHasPoppedOrIsPopping.Where(x => x.gameObject.activeSelf))
         {
             item.Pop();
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(DelayBetweenPops);
         }
 
         while (AnyToPopAreNotPopped())
@@ -92,6 +110,8 @@ public class ControlPlayers : MonoBehaviour
         waitForAllPops = null;
     }
 
+    private bool HaveWonLoadingNextScene = false;
+
     private void CheckLevelState()
     {
         // if All Coloured Units are popped. Have finished level.
@@ -99,6 +119,7 @@ public class ControlPlayers : MonoBehaviour
         if (allUnits.All(x => Popped.ToPopHasPoppedOrIsPopping.Contains(x)))
         {
             GameLevels.LevelCompleted(transition);
+            HaveWonLoadingNextScene = true;
             return;
         }
 

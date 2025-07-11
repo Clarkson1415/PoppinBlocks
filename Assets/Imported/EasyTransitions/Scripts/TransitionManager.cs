@@ -57,7 +57,7 @@ namespace EasyTransition
         /// <param name="startDelay">The delay before the transition starts.</param>
         public void Transition(string sceneName, TransitionSettings transition, float startDelay)
         {
-            if (transition == null || runningTransition)
+            if (transition == null && runningTransition)
             {
                 Debug.LogError("You have to assing a transition.");
                 return;
@@ -175,9 +175,9 @@ namespace EasyTransition
             while (this.gameObject.activeInHierarchy)
             {
                 //Check for multiple instances of the Transition Manager component
-                var managerCount = GameObject.FindObjectsOfType<TransitionManager>(true).Length;
+                var managerCount = GameObject.FindObjectsByType<TransitionManager>(FindObjectsSortMode.None).Length;
                 if (managerCount > 1)
-                    Debug.LogError($"There are {managerCount.ToString()} Transition Managers in your scene. Please ensure there is only one Transition Manager in your scene or overlapping transitions may occur.");
+                    Debug.LogError($"There are {managerCount} Transition Managers in your scene. Please ensure there is only one Transition Manager in your scene or overlapping transitions may occur.");
             
                 yield return new WaitForSecondsRealtime(1f);
             }

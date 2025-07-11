@@ -49,6 +49,7 @@ MonoBehaviour:
   activePlayers:
   - {fileID: 0}
   transition: {fileID: 11400000, guid: b577ec7af0d48c34a9d31ce17f830a8d, type: 2}
+  DelayBetweenPops: 0.05
 --- !u!114 &5177532525971883898
 MonoBehaviour:
   m_ObjectHideFlags: 0
