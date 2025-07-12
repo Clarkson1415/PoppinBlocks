@@ -15,7 +15,12 @@ namespace Assets.Scripts
         
         public static float RaycastDistance = 0.6f;
 
-        public Animator animator;
+        /// <summary>
+        /// Blank state is AFTer Popped has happened.
+        /// </summary>
+        public bool FinishedPopping => this.animator.GetCurrentAnimatorStateInfo(0).IsName("Blank");
+
+        private Animator animator;
 
         public bool IsTouchingAnotherOfSameColour => this.IsAdjacentToSameColour();
 

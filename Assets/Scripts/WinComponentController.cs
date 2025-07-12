@@ -3,8 +3,10 @@
 namespace Assets.Scripts
 {
     [RequireComponent(typeof(Animator))]
-    public class WonLevelText : MonoBehaviour
+    public class WinComponentController : MonoBehaviour
     {
+        [SerializeField] private WinParticleTrigger winParticleTrigger;
+
         private Animator animator;
 
         public bool IsFinishedAnimating => this.animator.GetCurrentAnimatorStateInfo(0).IsName("StayIn");
@@ -21,6 +23,7 @@ namespace Assets.Scripts
         {
             this.animator.SetTrigger("On");
             this.audiosSource.Play();
+            winParticleTrigger.PlayParticles();
         }
     }
 }

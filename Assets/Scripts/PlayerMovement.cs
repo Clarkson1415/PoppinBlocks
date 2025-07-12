@@ -19,6 +19,8 @@ namespace Assets.Scripts
 
         [HideInInspector] public ColouredUnit colouredUnit;
 
+        [SerializeField] private Dust dust;
+
         private void Awake()
         {
             moveOnGrid = GetComponent<MoveOnGrid>();
@@ -38,7 +40,39 @@ namespace Assets.Scripts
 
             var wasMoved = this.moveOnGrid.TryMoveBy(moveInput);
 
+            if (wasMoved)
+            {
+                this.PlayDustAnimation(moveInput);
+            }
+
             return wasMoved;
+        }
+
+
+        private float dustOffset = 1f;
+
+        private void PlayDustAnimation(Vector2 moveInput)
+        {
+            if (moveInput == Vector2.zero)
+                return;
+
+            // Normalize input to avoid large offsets
+            Vector3 offset = (Vector3)(-moveInput.normalized * dustOffset);
+
+            // Position dust slightly behind current position
+            dust.gameObject.transform.position = transform.position + offset;
+
+            // Rotate to face movement direction
+            float angle = Mathf.Atan2(moveInput.y, moveInput.x) * Mathf.Rad2Deg;
+            dust.gameObject.transform.rotation = Quaternion.Euler(0, 0, angle); // Adjust depending on sprite orientation
+
+            // Play the animation trigger
+            dust.PlayDust();
+
+            // was moved by moveInput
+
+            // set dust gameobject to face the direction of move input at the coordinates at this.transform - moveInput.
+            // play animation. Trigger is "Dust"
         }
     }
 }

@@ -4710,10 +4710,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameMusic
       objectReference: {fileID: 0}
-    - target: {fileID: 6565413026792789714, guid: bbbefdd6d001b2e40a38502e7465baa1, type: 3}
-      propertyPath: m_Volume
-      value: 0.782
-      objectReference: {fileID: 0}
     - target: {fileID: 7236300282724879276, guid: bbbefdd6d001b2e40a38502e7465baa1, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.01123

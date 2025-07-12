@@ -22,7 +22,8 @@ public class ControlPlayers : MonoBehaviour
 
     private Vector2 moveInput;
 
-    private WonLevelText WonLevelText;
+    private WinComponentController WonLevelText;
+    
 
     private void Awake()
     {
@@ -39,7 +40,7 @@ public class ControlPlayers : MonoBehaviour
 
         allUnits = FindObjectsByType<ColouredUnit>(FindObjectsSortMode.None);
 
-        WonLevelText = FindFirstObjectByType<WonLevelText>();
+        WonLevelText = FindFirstObjectByType<WinComponentController>();
     }
 
     private bool processingMove = false;
@@ -117,7 +118,7 @@ public class ControlPlayers : MonoBehaviour
 
     private bool AnyToPopAreNotPopped()
     {
-        return !Popped.ToPopHasPoppedOrIsPopping.Where(x => x.gameObject.activeSelf).All(x => x.animator.GetCurrentAnimatorStateInfo(0).IsName("Blank"));
+        return !Popped.ToPopHasPoppedOrIsPopping.Where(x => x.gameObject.activeSelf).All(x => x.FinishedPopping);
     }
 
     public float DelayBetweenPops = 0.2f;

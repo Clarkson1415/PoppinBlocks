@@ -7,13 +7,13 @@ using UnityEngine;
 
 public class MoveOnGrid : MonoBehaviour
 {
-    private Collider2D collider;
+    private Collider2D collider2d;
 
     private ColouredUnit colouredUnit;
 
     private void Awake()
     {
-        collider = GetComponent<Collider2D>();
+        collider2d = GetComponent<Collider2D>();
         colouredUnit = GetComponent<ColouredUnit>();
     }
 
@@ -118,7 +118,7 @@ public class MoveOnGrid : MonoBehaviour
         var newContacts = new ContactFilter2D();
         newContacts.useTriggers = true;
         List<Collider2D> overlapping = new();
-        if (this.collider.Overlap(newContacts, overlapping) > 0)
+        if (this.collider2d.Overlap(newContacts, overlapping) > 0)
         {
             if (overlapping.Count == 0)
             {
