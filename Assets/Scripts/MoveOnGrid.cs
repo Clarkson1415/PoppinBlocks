@@ -117,13 +117,19 @@ public class MoveOnGrid : MonoBehaviour
         // Check if this guy is on a swirler and update colour here.
         var newContacts = new ContactFilter2D();
         newContacts.useTriggers = true;
-        var overlapping = new Collider2D[1];
+        List<Collider2D> overlapping = new();
         if (this.collider.Overlap(newContacts, overlapping) > 0)
         {
-            var swirler = overlapping.FirstOrDefault(x => x.TryGetComponent<ColourChanger>(out var swirl));
-
-            if (swirler != null)
+            if (overlapping.Count == 0)
             {
+                return;
+            }
+
+            var swirlerExists = overlapping.Any(x => x.TryGetComponent<ColourChanger>(out var _));
+
+            if (swirlerExists)
+            {
+                var swirler = overlapping.First(x => x.TryGetComponent<ColourChanger>(out var _));
                 this.colouredUnit.ChangeColour(swirler.GetComponent<ColourChanger>().Colour);
             }
         }

@@ -42,17 +42,21 @@ public class ControlPlayers : MonoBehaviour
         WonLevelText = FindFirstObjectByType<WonLevelText>();
     }
 
+    private bool processingMove = false;
+
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (!context.started)
+        if (processingMove || AnyToPopAreNotPopped())
             return;
 
-        moveInput = context.ReadValue<Vector2>();
-
-        if (AnyToPopAreNotPopped())
+        if (!context.started)
         {
             return;
         }
+
+        processingMove = true;
+
+        moveInput = context.ReadValue<Vector2>();
 
         foreach (var player in activePlayers)
         {
@@ -75,6 +79,8 @@ public class ControlPlayers : MonoBehaviour
         }
 
         this.PopIfTouching();
+
+        processingMove = false;
     }
 
     private void PopIfTouching()

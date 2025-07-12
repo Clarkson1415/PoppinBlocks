@@ -9,18 +9,18 @@ namespace Assets.Scripts
 
         public bool IsFinishedAnimating => this.animator.GetCurrentAnimatorStateInfo(0).IsName("StayIn");
 
-        private AudioSource audio;
+        private AudioSource audiosSource;
 
         private void Awake()
         {
             this.animator = this.GetComponent<Animator>();
-            audio = this.GetComponent<AudioSource>();
+            audiosSource = this.GetComponent<AudioSource>();
         }
 
         public void TurnOn()
         {
             this.animator.SetTrigger("On");
-            this.audio.Play();
+            this.audiosSource.Play();
         }
     }
 }
