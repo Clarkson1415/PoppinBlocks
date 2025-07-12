@@ -1,4 +1,5 @@
 using Assets.Scripts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,6 +7,16 @@ using UnityEngine;
 
 public class MoveOnGrid : MonoBehaviour
 {
+    private Collider2D collider;
+
+    private ColouredUnit colouredUnit;
+
+    private void Awake()
+    {
+        collider = GetComponent<Collider2D>();
+        colouredUnit = GetComponent<ColouredUnit>();
+    }
+
     private void Start()
     {
         this.SnapToGrid();
@@ -34,8 +45,7 @@ public class MoveOnGrid : MonoBehaviour
         // If there is no item in front move and return.
         if (itemInFront.collider == null || itemInFront.collider.isTrigger)
         {
-            this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
-            this.SnapToGrid();
+            MoveThenUpdateIfOnSwirler(moveBy);
             return true;
         }
 
@@ -84,7 +94,7 @@ public class MoveOnGrid : MonoBehaviour
         {
             if (pushable.TryGetComponent<MoveOnGrid>(out var pushablesMover))
             {
-                pushablesMover.MoveAndSnap(moveBy);
+                pushablesMover.MoveThenUpdateIfOnSwirler(moveBy);
             }
             else
             {
@@ -92,14 +102,30 @@ public class MoveOnGrid : MonoBehaviour
             }
         }
 
-        MoveAndSnap(moveBy);
+        MoveThenUpdateIfOnSwirler(moveBy);
 
         return true;
     }
 
-    private void MoveAndSnap(Vector2 moveBy)
+    private void MoveThenUpdateIfOnSwirler(Vector2 moveBy)
     {
         this.transform.Translate(new Vector3(moveBy.x, moveBy.y, 0));
         this.SnapToGrid();
+
+        Physics2D.SyncTransforms();
+
+        // Check if this guy is on a swirler and update colour here.
+        var newContacts = new ContactFilter2D();
+        newContacts.useTriggers = true;
+        var overlapping = new Collider2D[1];
+        if (this.collider.Overlap(newContacts, overlapping) > 0)
+        {
+            var swirler = overlapping.FirstOrDefault(x => x.TryGetComponent<ColourChanger>(out var swirl));
+
+            if (swirler != null)
+            {
+                this.colouredUnit.ChangeColour(swirler.GetComponent<ColourChanger>().Colour);
+            }
+        }
     }
 }

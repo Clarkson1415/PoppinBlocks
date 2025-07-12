@@ -49,11 +49,16 @@ public class ControlPlayers : MonoBehaviour
 
         moveInput = context.ReadValue<Vector2>();
 
+        if (AnyToPopAreNotPopped())
+        {
+            return;
+        }
+
         foreach (var player in activePlayers)
         {
             if (Popped.ToPopHasPoppedOrIsPopping.Contains(player.colouredUnit))
             {
-                return;
+                continue;
             }
 
             var wasMoved = player.TryMove(moveInput);
@@ -63,10 +68,7 @@ public class ControlPlayers : MonoBehaviour
                 this.moveAudio.Play();
             }
         }
-    }
 
-    private void Update()
-    {
         if (HaveWonLoadingNextScene)
         {
             return;

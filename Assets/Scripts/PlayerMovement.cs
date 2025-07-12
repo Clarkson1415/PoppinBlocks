@@ -38,8 +38,6 @@ namespace Assets.Scripts
 
             var wasMoved = this.moveOnGrid.TryMoveBy(moveInput);
 
-            Physics2D.SyncTransforms(); // Sync colliders to transforms.
-
             return wasMoved;
         }
     }
