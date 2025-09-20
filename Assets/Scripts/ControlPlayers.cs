@@ -20,10 +20,18 @@ public class ControlPlayers : MonoBehaviour
 
     private PauseScreen pauseScreen;
 
-    private Vector2 moveInput;
-
     private WinComponentController WonLevelText;
     
+    public static ControlPlayers? Instance()
+    {
+        var playerControllers = FindObjectsByType<ControlPlayers>(FindObjectsSortMode.None);
+        if (playerControllers.Length > 1)
+        {
+            throw new ArgumentOutOfRangeException("There should never be more than 1 ControlPlayers in a scene.");
+        }
+
+        return FindObjectsByType<ControlPlayers>(FindObjectsSortMode.None).FirstOrDefault();
+    }
 
     private void Awake()
     {
@@ -43,21 +51,46 @@ public class ControlPlayers : MonoBehaviour
         WonLevelText = FindFirstObjectByType<WinComponentController>();
     }
 
+    public void OnButtonUp()
+    {
+        ProcessMovement(Vector2.up);
+    }
+
+    public void OnButtonDown()
+    {
+        ProcessMovement(Vector2.down);
+    }
+
+    public void OnButtonLeft()
+    {
+        ProcessMovement(Vector2.left);
+    }
+
+    public void OnButtonRight()
+    {
+        ProcessMovement(Vector2.right);
+    }
+
     private bool processingMove = false;
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (processingMove || AnyToPopAreNotPopped())
-            return;
-
         if (!context.started)
         {
             return;
         }
 
-        processingMove = true;
+        ProcessMovement(context.ReadValue<Vector2>());
+    }
 
-        moveInput = context.ReadValue<Vector2>();
+    private void ProcessMovement(Vector2 movementDir)
+    {
+        Console.WriteLine("process movement called.");
+
+        if (processingMove || AnyToPopAreNotPopped())
+            return;
+
+        processingMove = true;
 
         foreach (var player in activePlayers)
         {
@@ -66,7 +99,7 @@ public class ControlPlayers : MonoBehaviour
                 continue;
             }
 
-            var wasMoved = player.TryMove(moveInput);
+            var wasMoved = player.TryMove(movementDir);
 
             if (wasMoved)
             {

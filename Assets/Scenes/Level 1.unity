@@ -481,7 +481,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 6
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -3477,6 +3477,11 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &970842756 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2455940675371465664, guid: a039a9257ce7b0040bf2a542e321c599, type: 3}
+  m_PrefabInstance: {fileID: 469218530}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1170928692
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3705,6 +3710,26 @@ PrefabInstance:
       propertyPath: 'activePlayers.Array.data[0]'
       value: 
       objectReference: {fileID: 1286914674}
+    - target: {fileID: 5177532525971883898, guid: 449c6b6c7afae56449f5ada1c838735c, type: 3}
+      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5177532525971883898, guid: 449c6b6c7afae56449f5ada1c838735c, type: 3}
+      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5177532525971883898, guid: 449c6b6c7afae56449f5ada1c838735c, type: 3}
+      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 970842756}
+    - target: {fileID: 5177532525971883898, guid: 449c6b6c7afae56449f5ada1c838735c, type: 3}
+      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5177532525971883898, guid: 449c6b6c7afae56449f5ada1c838735c, type: 3}
+      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: ControlPlayers, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 6612828063202449038, guid: 449c6b6c7afae56449f5ada1c838735c, type: 3}
       propertyPath: m_Name
       value: ControlPlayers
