@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
+using Unity.VisualScripting;
 
 namespace Assets.Scripts
 {
@@ -23,10 +24,29 @@ namespace Assets.Scripts
             return LevelNames[currentLevelIndex + 1];
         }
 
+        public static bool HasLevelBeenBeaten(string levelName)
+        {
+            var completedLevels = PlayerPrefs.GetString(CompletedLevelsString);
+            return completedLevels == null ? false : completedLevels.Contains(levelName);
+        }
+
+        private static string CompletedLevelsString = "CompletedLevels";
+
+        private static void AddToCompletedLevels(string levelName)
+        {
+            var completedLevels = PlayerPrefs.GetString(CompletedLevelsString);
+            if (!completedLevels.Contains(levelName))
+            {
+                completedLevels += levelName + ";";
+                PlayerPrefs.SetString(CompletedLevelsString, completedLevels);
+            }
+        }
+
         private static string CurrentLevel = SceneManager.GetActiveScene().name;
 
         public static void LevelCompleted(TransitionSettings setting)
         {
+            AddToCompletedLevels(SceneManager.GetActiveScene().name);
             CurrentLevel = GetNextLevel();
             LoadLevel(setting, CurrentLevel);
         }
