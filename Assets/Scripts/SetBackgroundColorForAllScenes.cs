@@ -1,7 +1,6 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.SceneManagement;
-using UnityEngine.SceneManagement;
 
 public class SetBackgroundColorForAllScenes
 {
@@ -19,7 +18,7 @@ public class SetBackgroundColorForAllScenes
 
             if (!scenePath.Contains("Scenes")) continue;
 
-            Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
             Camera mainCam = Camera.main;
             if (mainCam != null)
             {
