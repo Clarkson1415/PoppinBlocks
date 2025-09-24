@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class HookUpButtonMovement : MonoBehaviour
+public class HookUpArrowKeyMovement : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -22,11 +22,6 @@ public class HookUpButtonMovement : MonoBehaviour
         down = children[1];
         left = children[2];
         right = children[3];
-
-        //children[0].onClick.AddListener(() => playerController.OnButtonUp());
-        //children[1].onClick.AddListener(() => playerController.OnButtonDown());
-        //children[2].onClick.AddListener(() => playerController.OnButtonLeft());
-        //children[3].onClick.AddListener(() => playerController.OnButtonRight());
 
         up.AddComponent<ButtonPressHandler>();
         var customU = up.GetComponent<ButtonPressHandler>();

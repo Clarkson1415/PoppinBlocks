@@ -10706,7 +10706,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 5219113088016246868, guid: ecd15b109bcd4d24c8df51f340e32b6c, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ecd15b109bcd4d24c8df51f340e32b6c, type: 3}
@@ -10808,7 +10809,8 @@ PrefabInstance:
       value: ButtinWithS_StartGame
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 142168811868649672, guid: ed597620912cd17439762a5ab41b164b, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ed597620912cd17439762a5ab41b164b, type: 3}
